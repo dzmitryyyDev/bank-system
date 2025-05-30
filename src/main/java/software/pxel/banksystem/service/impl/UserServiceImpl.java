@@ -1,5 +1,6 @@
 package software.pxel.banksystem.service.impl;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import software.pxel.banksystem.service.UserService;
 import software.pxel.banksystem.service.mapper.UserMapper;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -28,16 +28,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserDTO> searchUsers(LocalDate dateOfBirth, String phone, String name, String email, Pageable pageable) {
+    public Page<UserDTO> getUsers(LocalDate dateOfBirth, String phone, String name, String email, Pageable pageable) {
         Specification<UserEntity> spec = UserSpecification.dateOfBirthAfter(dateOfBirth)
                 .and(UserSpecification.phoneEquals(phone))
                 .and(UserSpecification.nameStartsWith(name))
                 .and(UserSpecification.emailEquals(email));
 
-        return userRepository.findAll(spec, pageable)
-                .getContent()
-                .stream()
-                .map(userMapper::toDTO)
-                .toList();
+        return userRepository.findAll(spec, pageable).map(userMapper::toDTO);
     }
 }
