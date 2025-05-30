@@ -6,4 +6,7 @@ import software.pxel.banksystem.dao.entity.EmailDataEntity;
 
 @Repository
 public interface EmailDataRepository extends JpaRepository<EmailDataEntity, Long> {
+
+    boolean existsByEmail(String email);
+
 }
