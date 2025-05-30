@@ -1,0 +1,9 @@
+package software.pxel.banksystem.dao.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import software.pxel.banksystem.dao.entity.UserEntity;
+
+@Repository
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
+}
