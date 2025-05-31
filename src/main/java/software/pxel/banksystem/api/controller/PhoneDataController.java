@@ -22,12 +22,9 @@ public class PhoneDataController {
         this.phoneDataService = phoneDataService;
     }
 
-    @PostMapping("/user/{userId}")
-    public ResponseEntity<PhoneDataDTO> create(
-            @PathVariable(name = "userId") @Positive(message = "User ID must be a positive number") Long userId,
-            @Valid @RequestBody CreatePhoneDataDTO createPhoneDataDTO
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(phoneDataService.create(userId, createPhoneDataDTO));
+    @PostMapping
+    public ResponseEntity<PhoneDataDTO> create(@Valid @RequestBody CreatePhoneDataDTO createPhoneDataDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(phoneDataService.create(createPhoneDataDTO));
     }
 
     @PatchMapping("/{phoneId}")

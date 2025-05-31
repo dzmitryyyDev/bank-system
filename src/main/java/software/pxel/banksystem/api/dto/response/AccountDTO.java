@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 
 public record AccountDTO(
         Long id,
+        Long userId,
         BigDecimal balance,
-        Long userId
-) {}
+        BigDecimal initialBalance
+) {
+}

@@ -22,12 +22,9 @@ public class EmailDataController {
         this.emailDataService = emailDataService;
     }
 
-    @PostMapping("/user/{userId}")
-    public ResponseEntity<EmailDataDTO> create(
-            @PathVariable(name = "userId") @Positive(message = "User ID must be a positive number") Long userId,
-            @Valid @RequestBody CreateEmailDataDTO createEmailDataDTO
-    ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(emailDataService.create(userId, createEmailDataDTO));
+    @PostMapping
+    public ResponseEntity<EmailDataDTO> create(@Valid @RequestBody CreateEmailDataDTO createEmailDataDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(emailDataService.create(createEmailDataDTO));
     }
 
     @PatchMapping("/{emailId}")
