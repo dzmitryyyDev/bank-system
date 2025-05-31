@@ -1,16 +1,14 @@
 package software.pxel.banksystem.service.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import software.pxel.banksystem.dao.repository.AccountRepository;
 import software.pxel.banksystem.service.AccountService;
 
+@Slf4j
 @Service
 public class AccountServiceImpl implements AccountService {
-
-    private static final Logger log = LogManager.getLogger(AccountServiceImpl.class);
 
     private final AccountRepository accountRepository;
 
