@@ -10,4 +10,6 @@ public interface UserService {
 
     Page<UserDTO> getUsers(LocalDate dateOfBirth, String phone, String name, String email, Pageable pageable);
 
+    void evictUsersCache();
+
 }

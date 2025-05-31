@@ -8,17 +8,30 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
   liquibase:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.yaml
-  profiles:
-    active: default
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      connect-timeout: 2000
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
+          max-wait: 5000ms
+
+cache:
+  ttl:
+    users: ${CACHE_TTL_USERS:10m}
 
 jwt:
-  secret: testcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesrettestcesret2
-  expiration-ms: 3600000
+  secret: ${JWT_SECRET:1739413b65e83406f3f1f98a3154e4e015f5646e952049fe097486463a9ae02e01514e0f454280f808bb8d8d632c7660cea7bcccd3918f2008174072fe275e9bc8d153967f53053e9e5d801f0b7b991e3bb4512f526246b334c3cd8701cb656363a96c08653c65ec5777ae3729b3d60d1074215a7a18d70a9768d80255a1a8af7a4c5086335f5c0c93a8e932f69f39934ac34e70ee57ae3647673db53e59212220c6294e9f51b5aef3245703d5694316b2ff66500d1a853023a1fcad4443d4ce7673e31b0f67d44c11589e69a9986ececb3fa8a58cb7660e51d442ee9671135ac49026ce0ea6b775927c62dc4916e8a894cdad9f5af47869473cca171b037bea}
+  expiration-ms: ${JWT_EXPIRATION_MS:3600000}

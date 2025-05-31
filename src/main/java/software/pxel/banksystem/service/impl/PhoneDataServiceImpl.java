@@ -14,6 +14,7 @@ import software.pxel.banksystem.dao.entity.UserEntity;
 import software.pxel.banksystem.dao.repository.PhoneDataRepository;
 import software.pxel.banksystem.dao.repository.UserRepository;
 import software.pxel.banksystem.service.PhoneDataService;
+import software.pxel.banksystem.service.UserService;
 import software.pxel.banksystem.service.common.CommonService;
 import software.pxel.banksystem.service.mapper.PhoneDataMapper;
 
@@ -30,13 +31,16 @@ public class PhoneDataServiceImpl implements PhoneDataService {
 
     private final CommonService commonService;
 
+    private final UserService userService;
 
-    public PhoneDataServiceImpl(PhoneDataMapper phoneDataMapper, PhoneDataRepository phoneDataRepository, UserRepository userRepository, JwtUtils jwtUtils, CommonService commonService) {
+
+    public PhoneDataServiceImpl(PhoneDataMapper phoneDataMapper, PhoneDataRepository phoneDataRepository, UserRepository userRepository, JwtUtils jwtUtils, CommonService commonService, UserService userService) {
         this.phoneDataMapper = phoneDataMapper;
         this.userRepository = userRepository;
         this.phoneDataRepository = phoneDataRepository;
         this.jwtUtils = jwtUtils;
         this.commonService = commonService;
+        this.userService = userService;
     }
 
     @Override
@@ -60,6 +64,9 @@ public class PhoneDataServiceImpl implements PhoneDataService {
 
         user.getPhoneData().add(phoneData);
 
+        // evict users cache
+        userService.evictUsersCache();
+
         return phoneDataMapper.toDTO(phoneDataRepository.save(phoneData));
     }
 
@@ -82,6 +89,9 @@ public class PhoneDataServiceImpl implements PhoneDataService {
         }
 
         phoneData.setPhone(request.phone());
+
+        // evict users cache
+        userService.evictUsersCache();
 
         return phoneDataMapper.toDTO(phoneData);
     }
@@ -109,6 +119,9 @@ public class PhoneDataServiceImpl implements PhoneDataService {
         PhoneDataDTO dto = phoneDataMapper.toDTO(phoneData);
 
         phoneDataRepository.delete(phoneData);
+
+        // evict users cache
+        userService.evictUsersCache();
 
         return dto;
     }

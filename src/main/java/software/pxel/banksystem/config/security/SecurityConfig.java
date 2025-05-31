@@ -14,6 +14,11 @@ import software.pxel.banksystem.config.security.filter.JwtAuthenticationFilter;
 public class SecurityConfig {
 
     private static final String[] WHITELIST = new String[]{
+            "/v3/api-docs/**",
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/swagger-resources/**",
+            "/webjars/**",
             "/api/v1/auth/**"
     };
 

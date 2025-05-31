@@ -1,5 +1,7 @@
 package software.pxel.banksystem.service.impl;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -28,6 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "usersCache", key = "#dateOfBirth + '-' + #phone + '-' + #name + '-' + #email + '-' + #pageable.pageNumber + '-' + #pageable.pageSize")
     public Page<UserDTO> getUsers(LocalDate dateOfBirth, String phone, String name, String email, Pageable pageable) {
         Specification<UserEntity> spec = UserSpecification.dateOfBirthAfter(dateOfBirth)
                 .and(UserSpecification.phoneEquals(phone))
@@ -35,5 +38,9 @@ public class UserServiceImpl implements UserService {
                 .and(UserSpecification.emailEquals(email));
 
         return userRepository.findAll(spec, pageable).map(userMapper::toDTO);
+    }
+
+    @CacheEvict(value = "usersCache", allEntries = true)
+    public void evictUsersCache() {
     }
 }

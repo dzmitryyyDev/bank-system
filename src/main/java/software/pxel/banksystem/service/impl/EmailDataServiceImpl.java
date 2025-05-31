@@ -14,6 +14,7 @@ import software.pxel.banksystem.dao.entity.UserEntity;
 import software.pxel.banksystem.dao.repository.EmailDataRepository;
 import software.pxel.banksystem.dao.repository.UserRepository;
 import software.pxel.banksystem.service.EmailDataService;
+import software.pxel.banksystem.service.UserService;
 import software.pxel.banksystem.service.common.CommonService;
 import software.pxel.banksystem.service.mapper.EmailDataMapper;
 
@@ -30,13 +31,16 @@ public class EmailDataServiceImpl implements EmailDataService {
 
     private final CommonService commonService;
 
+    private final UserService userService;
 
-    public EmailDataServiceImpl(EmailDataRepository emailDataRepository, EmailDataMapper emailDataMapper, UserRepository userRepository, JwtUtils jwtUtils, CommonService commonService) {
+
+    public EmailDataServiceImpl(EmailDataRepository emailDataRepository, EmailDataMapper emailDataMapper, UserRepository userRepository, JwtUtils jwtUtils, CommonService commonService, UserService userService) {
         this.emailDataRepository = emailDataRepository;
         this.emailDataMapper = emailDataMapper;
         this.userRepository = userRepository;
         this.jwtUtils = jwtUtils;
         this.commonService = commonService;
+        this.userService = userService;
     }
 
     @Override
@@ -59,6 +63,9 @@ public class EmailDataServiceImpl implements EmailDataService {
         emailData.setUser(user);
 
         user.getEmailData().add(emailData);
+
+        // evict users cache
+        userService.evictUsersCache();
 
         return emailDataMapper.toDTO(emailDataRepository.save(emailData));
     }
@@ -86,6 +93,9 @@ public class EmailDataServiceImpl implements EmailDataService {
 
         emailData.setEmail(request.email());
 
+        // evict users cache
+        userService.evictUsersCache();
+
         return emailDataMapper.toDTO(emailData);
     }
 
@@ -112,6 +122,9 @@ public class EmailDataServiceImpl implements EmailDataService {
         EmailDataDTO dto = emailDataMapper.toDTO(emailData);
 
         emailDataRepository.delete(emailData);
+
+        // evict users cache
+        userService.evictUsersCache();
 
         return dto;
     }
