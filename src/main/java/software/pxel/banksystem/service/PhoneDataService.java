@@ -6,7 +6,7 @@ import software.pxel.banksystem.api.dto.response.PhoneDataDTO;
 
 public interface PhoneDataService {
 
-    PhoneDataDTO create(Long userId, CreatePhoneDataDTO request);
+    PhoneDataDTO create(CreatePhoneDataDTO request);
 
     PhoneDataDTO update(Long phoneDataId, UpdatePhoneDataDTO request);
 

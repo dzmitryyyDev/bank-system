@@ -8,11 +8,13 @@ import software.pxel.banksystem.api.dto.request.UpdatePhoneDataDTO;
 import software.pxel.banksystem.api.dto.response.PhoneDataDTO;
 import software.pxel.banksystem.api.exception.BadRequestException;
 import software.pxel.banksystem.api.exception.AlreadyExistsException;
+import software.pxel.banksystem.config.security.utils.JwtUtils;
 import software.pxel.banksystem.dao.entity.PhoneDataEntity;
 import software.pxel.banksystem.dao.entity.UserEntity;
 import software.pxel.banksystem.dao.repository.PhoneDataRepository;
 import software.pxel.banksystem.dao.repository.UserRepository;
 import software.pxel.banksystem.service.PhoneDataService;
+import software.pxel.banksystem.service.common.CommonService;
 import software.pxel.banksystem.service.mapper.PhoneDataMapper;
 
 @Service
@@ -24,21 +26,32 @@ public class PhoneDataServiceImpl implements PhoneDataService {
 
     private final PhoneDataRepository phoneDataRepository;
 
+    private final JwtUtils jwtUtils;
 
-    public PhoneDataServiceImpl(PhoneDataMapper phoneDataMapper, PhoneDataRepository phoneDataRepository, UserRepository userRepository) {
+    private final CommonService commonService;
+
+
+    public PhoneDataServiceImpl(PhoneDataMapper phoneDataMapper, PhoneDataRepository phoneDataRepository, UserRepository userRepository, JwtUtils jwtUtils, CommonService commonService) {
         this.phoneDataMapper = phoneDataMapper;
         this.userRepository = userRepository;
         this.phoneDataRepository = phoneDataRepository;
+        this.jwtUtils = jwtUtils;
+        this.commonService = commonService;
     }
 
     @Override
     @Transactional
-    public PhoneDataDTO create(Long userId, CreatePhoneDataDTO request) {
-        UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("User with id %s not found", userId)));
+    public PhoneDataDTO create(CreatePhoneDataDTO request) {
+        // get userId from jwt token
+        Long userId = jwtUtils.getUserIdFromSecurityContext();
 
+        // try to find user by userId
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // check that new phone is unique
         if (phoneDataRepository.existsByPhone(request.phone())) {
-            throw new AlreadyExistsException(String.format("Phone %s already exists", request.phone()));
+            throw new AlreadyExistsException("Phone already exists");
         }
 
         PhoneDataEntity phoneData = new PhoneDataEntity();
@@ -54,14 +67,18 @@ public class PhoneDataServiceImpl implements PhoneDataService {
     @Transactional
     public PhoneDataDTO update(Long phoneDataId, UpdatePhoneDataDTO request) {
         PhoneDataEntity phoneData = phoneDataRepository.findById(phoneDataId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Phone data with id %s not found", phoneDataId)));
+                .orElseThrow(() -> new EntityNotFoundException("Phone data not found"));
+
+        // get userId from jwt token and check that this user is owner of this phone
+        Long userId = jwtUtils.getUserIdFromSecurityContext();
+        commonService.validateOwnership(phoneData.getUser(), userId);
 
         if (request.phone().equals(phoneData.getPhone())) {
             return phoneDataMapper.toDTO(phoneData);
         }
 
         if (phoneDataRepository.existsByPhone(request.phone())) {
-            throw new AlreadyExistsException(String.format("Phone already exists: %s", request.phone()));
+            throw new AlreadyExistsException("Phone already exists");
         }
 
         phoneData.setPhone(request.phone());
@@ -72,13 +89,19 @@ public class PhoneDataServiceImpl implements PhoneDataService {
     @Override
     @Transactional
     public PhoneDataDTO delete(Long phoneDataId) {
+        // try to find phone data by id
         PhoneDataEntity phoneData = phoneDataRepository.findById(phoneDataId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Phone data with id %s not found", phoneDataId)));
+                .orElseThrow(() -> new EntityNotFoundException("Phone data not found"));
+
+        // get userId from jwt token and check that this user is owner of this phone
+        Long userId = jwtUtils.getUserIdFromSecurityContext();
+        commonService.validateOwnership(phoneData.getUser(), userId);
 
         UserEntity user = phoneData.getUser();
 
+        // cannot delete last user's phone
         if (user.getPhoneData().size() <= 1) {
-            throw new BadRequestException(String.format("User with id %s must have at least one phone", user.getId()));
+            throw new BadRequestException("User must have at least one phone");
         }
 
         user.getPhoneData().remove(phoneData);
