@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import software.pxel.banksystem.api.dto.request.LoginRequestDTO;
 import software.pxel.banksystem.api.dto.response.LoginResponseDTO;
+import software.pxel.banksystem.api.exception.ErrorMessages;
 import software.pxel.banksystem.api.exception.UnauthorizedException;
 import software.pxel.banksystem.config.security.utils.JwtUtils;
 import software.pxel.banksystem.dao.entity.EmailDataEntity;
@@ -31,12 +32,12 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponseDTO login(LoginRequestDTO loginRequestDTO) {
         // try to find email data
         EmailDataEntity emailData = emailDataRepository.findByEmail(loginRequestDTO.email())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.NOT_FOUND));
 
         // get user from email data and compare passwords
         UserEntity user = emailData.getUser();
         if (!passwordEncoder.matches(loginRequestDTO.password(), user.getPassword())) {
-            throw new UnauthorizedException("Incorrect password");
+            throw new UnauthorizedException(ErrorMessages.INCORRECT_PASSWORD);
         }
 
         // generate jwt token

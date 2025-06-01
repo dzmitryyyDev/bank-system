@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import software.pxel.banksystem.api.exception.ErrorMessages;
 import software.pxel.banksystem.api.exception.UnauthorizedException;
 
 import java.nio.charset.StandardCharsets;
@@ -40,7 +41,7 @@ public class JwtUtils {
                 .setSubject(userId.toString())
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .claim("USER_ID", userId)
+                .claim(CLAIM_USER_ID, userId)
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -48,7 +49,7 @@ public class JwtUtils {
     public Long getUserIdFromSecurityContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof Long userId)) {
-            throw new UnauthorizedException("User is not authenticated");
+            throw new UnauthorizedException(ErrorMessages.USER_IS_NOT_AUTHENTICATED);
         }
         return userId;
     }

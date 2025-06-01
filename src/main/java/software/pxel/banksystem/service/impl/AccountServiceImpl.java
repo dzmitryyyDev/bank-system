@@ -1,6 +1,7 @@
 package software.pxel.banksystem.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import software.pxel.banksystem.dao.repository.AccountRepository;
@@ -39,7 +40,11 @@ public class AccountServiceImpl implements AccountService {
 
         while (startId <= maxId) {
             endId = Math.min(startId + BATCH_SIZE - 1, maxId);
-            accountRepository.bulkUpdateBalancesInRange(startId, endId);
+            try {
+                accountRepository.bulkUpdateBalancesInRange(startId, endId);
+            } catch (DataAccessException e) {
+                log.warn("Error updating accounts in bulk [{} - {}]: ", startId, endId, e);
+            }
             startId = endId + 1;
         }
 

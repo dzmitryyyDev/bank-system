@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import software.pxel.banksystem.api.exception.ErrorMessages;
 import software.pxel.banksystem.config.security.utils.JwtUtils;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             } catch (JwtException | IllegalArgumentException e) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ErrorMessages.INVALID_OR_EXPIRED_JWT_TOKEN);
                 return;
             }
         }

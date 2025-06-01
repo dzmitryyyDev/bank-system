@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/db.changelog-create-schema-tables.sql
   - include:
       file: db/changelog/db.changelog-alter-column-initial-balance-accounts.sql
+  - include:
+      file: db/changelog/db.changelog-insert-test-data.sql
