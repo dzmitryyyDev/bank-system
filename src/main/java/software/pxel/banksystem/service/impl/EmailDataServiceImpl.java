@@ -8,6 +8,7 @@ import software.pxel.banksystem.api.dto.request.UpdateEmailDataDTO;
 import software.pxel.banksystem.api.dto.response.EmailDataDTO;
 import software.pxel.banksystem.api.exception.BadRequestException;
 import software.pxel.banksystem.api.exception.AlreadyExistsException;
+import software.pxel.banksystem.api.exception.ErrorMessages;
 import software.pxel.banksystem.config.security.utils.JwtUtils;
 import software.pxel.banksystem.dao.entity.EmailDataEntity;
 import software.pxel.banksystem.dao.entity.UserEntity;
@@ -51,11 +52,11 @@ public class EmailDataServiceImpl implements EmailDataService {
 
         // try to find user by userId
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.NOT_FOUND));
 
         // check that new email is unique
         if (emailDataRepository.existsByEmail(request.email())) {
-            throw new AlreadyExistsException("Email already exists");
+            throw new AlreadyExistsException(ErrorMessages.EMAIL_ALREADY_EXISTS);
         }
 
         EmailDataEntity emailData = new EmailDataEntity();
@@ -75,7 +76,7 @@ public class EmailDataServiceImpl implements EmailDataService {
     public EmailDataDTO update(Long emailId, UpdateEmailDataDTO request) {
         // try to find email data by id
         EmailDataEntity emailData = emailDataRepository.findById(emailId)
-                .orElseThrow(() -> new EntityNotFoundException("Email not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.NOT_FOUND));
 
         // get userId from jwt token and check that this user is owner of this email
         Long userId = jwtUtils.getUserIdFromSecurityContext();
@@ -88,7 +89,7 @@ public class EmailDataServiceImpl implements EmailDataService {
 
         // check that new email is unique
         if (emailDataRepository.existsByEmail(request.email())) {
-            throw new AlreadyExistsException("Email already exists");
+            throw new AlreadyExistsException(ErrorMessages.EMAIL_ALREADY_EXISTS);
         }
 
         emailData.setEmail(request.email());
@@ -104,7 +105,7 @@ public class EmailDataServiceImpl implements EmailDataService {
     public EmailDataDTO delete(Long emailId) {
         // try to find email data by id
         EmailDataEntity emailData = emailDataRepository.findById(emailId)
-                .orElseThrow(() -> new EntityNotFoundException("Email not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.NOT_FOUND));
 
         // get userId from jwt token and check that this user is owner of this email
         Long userId = jwtUtils.getUserIdFromSecurityContext();
@@ -114,7 +115,7 @@ public class EmailDataServiceImpl implements EmailDataService {
 
         // cannot delete last user's email
         if (user.getEmailData().size() <= 1) {
-            throw new BadRequestException("User must have at least one email");
+            throw new BadRequestException(ErrorMessages.USER_MUST_HAVE_AT_LEAST_ONE_EMAIL);
         }
 
         user.getEmailData().remove(emailData);

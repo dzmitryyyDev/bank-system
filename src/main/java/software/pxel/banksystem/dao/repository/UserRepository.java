@@ -18,4 +18,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long>, JpaSpec
     @Query("SELECT u FROM UserEntity u JOIN FETCH u.account WHERE u.id = :id")
     Optional<UserEntity> findByIdWithAccountForUpdate(@Param("id") Long id);
 
+    Optional<UserEntity> findByName(String name);
 }

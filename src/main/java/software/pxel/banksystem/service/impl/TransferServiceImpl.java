@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import software.pxel.banksystem.api.dto.request.CreateTransferDTO;
 import software.pxel.banksystem.api.dto.response.TransferDTO;
 import software.pxel.banksystem.api.exception.BadRequestException;
+import software.pxel.banksystem.api.exception.ErrorMessages;
 import software.pxel.banksystem.config.security.utils.JwtUtils;
 import software.pxel.banksystem.dao.entity.UserEntity;
 import software.pxel.banksystem.dao.repository.UserRepository;
@@ -31,21 +32,21 @@ public class TransferServiceImpl implements TransferService {
 
         // try to find user by fromUserId with PESSIMISTIC_WRITE lock
         UserEntity fromUser = userRepository.findByIdWithAccountForUpdate(fromUserId)
-                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.NOT_FOUND));
 
         // check that user and target user are not the same
         Long toUserId = createTransferDTO.toUserId();
         if (fromUser.getId().equals(toUserId)) {
-            throw new BadRequestException("Cannot transfer to yourself");
+            throw new BadRequestException(ErrorMessages.TRANSFER_TO_YOURSELF);
         }
 
         // try to find target user by toUserId with PESSIMISTIC_WRITE lock
         UserEntity toUser = userRepository.findByIdWithAccountForUpdate(toUserId)
-                .orElseThrow(() -> new EntityNotFoundException("Target user not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorMessages.NOT_FOUND));
 
         // check the balance, it must be positive
         if (fromUser.getAccount().getBalance().compareTo(createTransferDTO.amount()) < 0) {
-            throw new BadRequestException("Insufficient balance");
+            throw new BadRequestException(ErrorMessages.INSUFFICIENT_BALANCE);
         }
 
         // change the balances
